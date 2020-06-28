@@ -14,17 +14,17 @@
     <p>'*' = Required</p>
     <label>Name:* <input name='Name' type='text' placeholder = 'Type your name here' required></label>
     <p>Do you love this website?*</p>
-    <input type='radio' id='choice' name='choice' value='Yes' required>
-    <label for='choice'>Yes</label>
-    <input type='radio' id='choice' name='choice' value='YesYes'>
-    <label for='choice'>YesYes</label>
-    <input type='radio' id='choice' name='choice' value='No'>
-    <label for='choice'>No</label>
+    <input type='radio' id='yes' name='choice' value='Yes' required>
+    <label for='yes'>Yes</label>
+    <input type='radio' id='yesyes' name='choice' value='YesYes' required>
+    <label for='yesyes'>YesYes</label>
+    <input type='radio' id='no' name='choice' value='No' required>
+    <label for='no'>No</label>
     <br>
     <br>
     <label for='extra'>Anything you would like to add?</label>
     <br>
-    <textarea id='extra' name='extra' rows='4' cols='50' maxlength='200' placeholder='Gimme some suggestions or just send a message!'></textarea>
+    <textarea id='extra' name='extra' rows='4' cols='50' maxlength='200' placeholder='Gimme some suggestions or just send a message! (Max 250 characters)'></textarea>
     <br>
     <br>
     <div data-netlify-recaptcha='true'></div>
