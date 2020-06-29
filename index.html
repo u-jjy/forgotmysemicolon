@@ -39,15 +39,12 @@
     <br>
     <section>
       <form id ='basicForm' name='basicForm' method='POST' data-netlify='true' data-netlify-recaptcha='true'>
-        <small>'*' = Required</small>
+        <label><span style='color: red;'>*</span> Name - <input id='name' name='Name' type='text' placeholder = 'Type your name here...' required></label>
         <br><br>
-        <label>Name:* <input id='name' name='Name' type='text' placeholder = 'Type your name here...' required></label>
+        <label><span style='color: red;'>*</span> Email - <input id='email' name='email' type='email' placeholder="Insert your email here"></label>
         <br><br>
-        <label>Email:*<input id='email' name='email' type='email' placeholder="Insert your email here"></label>
-        <br><br>
-        <p>Do you love this website?*</p>
+        <p><span style='color: red;'>*</span> Do you love this website?</p>
         <label><input type='radio' id='yes' name='choice' value='Yes' required>Yes</label>
-        <label><input type='radio' id='yesyes' name='choice' value='YesYes' required>YesYes</label>
         <label><input type='radio' id='no' name='choice' value='No' required>No</label>
         <br>
         <br>
