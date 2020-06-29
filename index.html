@@ -2,24 +2,52 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
+    <meta name='description' content='A website to showcase all kinds of different projects and computer science concepts!'>
+    <meta name='keywords' content='computer science, tech, technology, sudoku solver, a* algorithm, projects'>
+    <link href='https://fonts.googleapis.com/css?family=Comfortaa' rel='stylesheet'>
     <title>Still working on it...</title>
+    <style media="screen">
+      #header {
+        text-align: center;
+        font-family: monospace;
+      }
+      #basicForm {
+        text-align: center;
+        font-family: Comfortaa;
+      }
+      #extra {
+        font-family: Comfortaa
+      }
+      #name {
+        font-family: Comfortaa
+      }
+      #email {
+        font-family: Comfortaa
+      }
+    </style>
   </head>
   <body>
-    <header>
-      <h2>Hopefully this website will become something special one day, or just a waste of money I guess. -ujjy</h2>
+    <header id='header'>
+      <h1>Hopefully this website will become something special one day, or just a waste of money I guess. -ujjy</h1>
     </header>
-    <br><br><br>
+    <br>
     <section>
-      <form name='testForm' method='POST' data-netlify='true' data-netlify-recaptcha='true'>
+      <form id ='basicForm' name='basicForm' method='POST' data-netlify='true' data-netlify-recaptcha='true'>
         <small>'*' = Required</small>
-        <label>Name:* <input name='Name' type='text' placeholder = 'Type your name here' required></label>
+        <br><br>
+        <label>Name:* <input id='name' name='Name' type='text' placeholder = 'Type your name here...' required></label>
+        <br><br>
+        <label>Email:*<input id='email' name='email' type='email' placeholder="Insert your email here"></label>
+        <br><br>
         <p>Do you love this website?*</p>
         <label><input type='radio' id='yes' name='choice' value='Yes' required>Yes</label>
         <label><input type='radio' id='yesyes' name='choice' value='YesYes' required>YesYes</label>
         <label><input type='radio' id='no' name='choice' value='No' required>No</label>
         <br>
         <br>
+        <br>
         <label for='extra'>Anything you would like to add?</label>
+        <br>
         <br>
         <textarea id='extra' name='extra' rows='4' cols='50' maxlength='200' placeholder='Gimme some suggestions or just send a message! (Max 250 characters)'></textarea>
         <br>
