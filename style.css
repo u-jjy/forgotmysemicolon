@@ -1,0 +1,29 @@
+header {
+  text-align: center;
+  font-family: monospace;
+}
+
+#feedbackForm {
+  text-align: center;
+  font-family: Comfortaa;
+}
+
+input {
+  font-family: Comfortaa;
+}
+
+textarea {
+  font-family: Comfortaa;
+}
+
+#containerForRecaptcha {
+  text-align: center;
+}
+
+#recaptcha {
+  display: inline-block;
+}
+
+#rating {
+  width: 198px;
+}
