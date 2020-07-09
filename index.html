@@ -7,7 +7,7 @@
     <link href='https://fonts.googleapis.com/css?family=Comfortaa' rel='stylesheet'>
     <title>Still working on it...</title>
     <style media="screen">
-      #header {
+      header {
         text-align: center;
         font-family: monospace;
       }
@@ -30,22 +30,27 @@
       #recaptcha {
         display: inline-block;
       }
+      #rating {
+        width: 198px;
+      }
     </style>
   </head>
   <body>
-    <header id='header'>
+    <header>
       <h1>Hopefully this website will become something special one day, or just a waste of money I guess. -ujjy</h1>
     </header>
     <br>
-    <section>
+    <main>
+    </main>
+    <footer>
       <form id ='basicForm' name='basicForm' method='POST' data-netlify='true' data-netlify-recaptcha='true'>
         <label><span style='color: red;'>*</span> Name - <input id='name' name='Name' type='text' placeholder = 'Type your name here' maxlength = '100' required></label>
         <br><br>
         <label><span style='color: red;'>*</span> Email - <input id='email' name='email' type='email' placeholder="Type your email here"></label>
         <br><br>
-        <p><span style='color: red;'>*</span> Do you love this website?</p>
-        <label><input type='radio' id='yes' name='choice' value='Yes' required>Yes</label>
-        <label><input type='radio' id='no' name='choice' value='No' required>No</label>
+        <p><span style='color: red;'>*</span> How good is this website on a scale from 1-10?</p>
+        <p>1&nbsp; 2&nbsp; 3&nbsp; 4&nbsp; 5&nbsp; 6&nbsp; 7&nbsp; 8&nbsp; 9&nbsp; 10</p>
+        <input type='range' id='rating' name='Rating' min="1" max='10' step="1">
         <br>
         <br>
         <br>
@@ -62,6 +67,6 @@
         <br>
         <input type='submit'>
       </form>
-    </section>
+    </footer>
   </body>
 </html>
