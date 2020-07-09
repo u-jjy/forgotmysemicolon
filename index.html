@@ -5,35 +5,8 @@
     <meta name='description' content='A website to showcase all kinds of different projects and computer science concepts!'>
     <meta name='keywords' content='computer science, tech, technology, sudoku solver, a* algorithm, projects'>
     <link href='https://fonts.googleapis.com/css?family=Comfortaa' rel='stylesheet'>
+    <link href='./style.css' rel='stylesheet' type='text/css'>
     <title>Still working on it...</title>
-    <style media="screen">
-      header {
-        text-align: center;
-        font-family: monospace;
-      }
-      #basicForm {
-        text-align: center;
-        font-family: Comfortaa;
-      }
-      #extra {
-        font-family: Comfortaa
-      }
-      #name {
-        font-family: Comfortaa
-      }
-      #email {
-        font-family: Comfortaa
-      }
-      #containerForRecaptcha {
-        text-align: center;
-      }
-      #recaptcha {
-        display: inline-block;
-      }
-      #rating {
-        width: 198px;
-      }
-    </style>
   </head>
   <body>
     <header>
@@ -43,7 +16,7 @@
     <main>
     </main>
     <footer>
-      <form id ='basicForm' name='basicForm' method='POST' data-netlify='true' data-netlify-recaptcha='true'>
+      <form id ='feedbackForm' name='feedbackForm' method='POST' data-netlify='true' data-netlify-recaptcha='true'>
         <label><span style='color: red;'>*</span> Name - <input id='name' name='Name' type='text' placeholder = 'Type your name here' maxlength = '100' required></label>
         <br><br>
         <label><span style='color: red;'>*</span> Email - <input id='email' name='email' type='email' placeholder="Type your email here"></label>
@@ -66,7 +39,7 @@
         <br>
         <br>
         <input type='submit'>
-      </form>
+    </form>
     </footer>
   </body>
 </html>
