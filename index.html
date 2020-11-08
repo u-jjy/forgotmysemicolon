@@ -25,20 +25,15 @@
 	    <footer>
 	    	<form id ='feedbackForm' name='feedbackForm' method='POST' data-netlify='true' data-netlify-recaptcha='true'>
 		    	<h3 style='text-align: center; font-family: Comfortaa; font-size: 16px;'>Here is a feedback form that you can fill out. Thank you for visiting!</h3>
-		        <label><span style='color: red;'>*</span> Full Name - <input id='name' name='Name' type='text' placeholder = 'Type your name here' maxlength = '100' required></label>
-		        <br><br>
-		        <label><span style='color: red;'>*</span> Email - <input id='email' name='email' type='email' placeholder="Type your email here"></label>
-		        <br><br>
-		        <p><span style='color: red;'>*</span> How good is this website on a scale from 1-10?</p>
+		        <label for='name'><span style='color: red;'>*</span> Full Name</label>
+		        <input id='name' name='Name' type='text' maxlength = '100' required>
+		        <label for='email'><span style='color: red;'>*</span> Email</label>
+		        <input id='email' name='email' type='email'>
+		        <p class='ratingTitle'><span style='color: red;'>*</span> How good is this website on a scale from 1-10?</p>
 		        <p>1&nbsp; 2&nbsp; 3&nbsp; 4&nbsp; 5&nbsp; 6&nbsp; 7&nbsp; 8&nbsp; 9&nbsp; 10</p>
 		        <input type='range' id='rating' name='Rating' min="1" max='10' step="1" class="rating" required>
-		        <br>
-		        <br>
-		        <br>
 		        <label for='extra'>Anything you would like to add?</label>
-		        <br>
-		        <br>
-		        <textarea id='extra' name='extra' rows='4' cols='50' maxlength='200' placeholder='Gimme some suggestions or just send a message! (Max 250 characters)'></textarea>
+		        <textarea id='extra' name='extra' rows='4' cols='50' maxlength='200' (Max 250 characters)'></textarea>
 		        <br>
 		        <br>
 		        <div id='containerForRecaptcha'>

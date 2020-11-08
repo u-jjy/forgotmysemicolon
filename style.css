@@ -7,8 +7,21 @@
   margin: 0% 30%;
 }
 
+footer label {
+  display: block;
+  padding: 2% 0% 2% 0%;
+}
+
+footer input[type='text'], input[type='email'], textarea {
+  width: 80%;
+}
+
 footer h3{
   margin: 2% 0 2% 0;
+}
+
+.ratingTitle {
+  padding-top: 2%;
 }
 
 .title {
