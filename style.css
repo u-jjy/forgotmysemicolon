@@ -16,6 +16,18 @@ footer input[type='text'], input[type='email'], textarea {
   width: 80%;
 }
 
+.button {
+  background-color: white;
+  padding: 2.5%;
+  border: 3px solid red;
+  border-radius: 25px;
+}
+
+.button:hover {
+  color: red;
+  cursor: pointer;
+}
+
 footer h3{
   margin: 2% 0 2% 0;
 }
