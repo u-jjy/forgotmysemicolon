@@ -1,0 +1,553 @@
+<html>
+<head>
+<title>Space Invaders.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #808080;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #cc7832;}
+.s3 { color: #6a8759;}
+.s4 { color: #6897bb;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+Space Invaders.py</font>
+</center></td></tr></table>
+<pre><span class="s0"># Importing and initializing</span>
+<span class="s2">import </span><span class="s1">pygame</span>
+<span class="s2">from </span><span class="s1">random </span><span class="s2">import </span><span class="s1">randint</span>
+<span class="s2">from </span><span class="s1">random </span><span class="s2">import </span><span class="s1">choice</span>
+<span class="s2">from </span><span class="s1">math </span><span class="s2">import </span><span class="s1">hypot</span>
+
+<span class="s1">pygame.init()</span>
+
+<span class="s0"># Setting an initial difficulty - This is later changed depending on the button pressed</span>
+<span class="s1">difficulty = </span><span class="s3">'E'</span>
+
+<span class="s0"># Setting screen dimension variables and creating a screen variable</span>
+<span class="s1">screen_width = </span><span class="s4">800</span>
+<span class="s1">screen_height = </span><span class="s4">600</span>
+<span class="s1">screen = pygame.display.set_mode((screen_width</span><span class="s2">, </span><span class="s1">screen_height))</span>
+
+<span class="s0"># Creating clock variable for framerate</span>
+<span class="s1">clock = pygame.time.Clock()</span>
+
+<span class="s0"># Changing the title and icon of screen</span>
+<span class="s1">pygame.display.set_caption(</span><span class="s3">'Space Invaders'</span><span class="s1">)</span>
+<span class="s1">icon = pygame.image.load(</span><span class="s3">'ufo icon.png'</span><span class="s1">)  </span><span class="s0"># Must load image into variable as PyGame surface before changing icon</span>
+<span class="s1">pygame.display.set_icon(icon)</span>
+
+<span class="s0"># Loading in audio files as PyGame objects</span>
+<span class="s1">bullet_fire = pygame.mixer.Sound(</span><span class="s3">'bullet_fire.wav'</span><span class="s1">)</span>
+<span class="s1">explosion = pygame.mixer.Sound(</span><span class="s3">'explosion.wav'</span><span class="s1">)</span>
+<span class="s1">pygame.mixer.music.load(</span><span class="s3">'background_music.wav'</span><span class="s1">)  </span><span class="s0"># Loading in music as object, no variable needed</span>
+<span class="s1">trumpetGameOver = pygame.mixer.Sound(</span><span class="s3">'trumpetGameOver.wav'</span><span class="s1">)</span>
+<span class="s1">click = pygame.mixer.Sound(</span><span class="s3">'click.wav'</span><span class="s1">)</span>
+<span class="s1">played_already = </span><span class="s2">False  </span><span class="s0"># Variable to stop multiple playbacks of trumpet sound</span>
+<span class="s0"># Playing music on loop by using -1 as a parameter</span>
+<span class="s1">pygame.mixer.music.play(-</span><span class="s4">1</span><span class="s1">)</span>
+
+
+<span class="s0"># Player class, attributes and methods</span>
+<span class="s2">class </span><span class="s1">Player:</span>
+    <span class="s2">def </span><span class="s1">__init__(self</span><span class="s2">, </span><span class="s1">x</span><span class="s2">, </span><span class="s1">y):</span>
+        <span class="s0"># Giving player coordinates</span>
+        <span class="s1">self.x = x</span>
+        <span class="s1">self.y = y</span>
+        <span class="s0"># Width and height of the image - also used for collision detection</span>
+        <span class="s1">self.width = </span><span class="s4">64</span>
+        <span class="s1">self.height = </span><span class="s4">64</span>
+        <span class="s0"># Loading in image as a PyGame surface</span>
+        <span class="s1">self.image = pygame.image.load(</span><span class="s3">'spaceship.png'</span><span class="s1">)</span>
+        <span class="s1">self.vel = </span><span class="s4">7</span>
+
+    <span class="s0"># Function to draw player onto the screen</span>
+    <span class="s2">def </span><span class="s1">draw_player(self):</span>
+        <span class="s1">screen.blit(self.image</span><span class="s2">, </span><span class="s1">(self.x</span><span class="s2">, </span><span class="s1">self.y))</span>
+
+    <span class="s2">def </span><span class="s1">move_right(self):</span>
+        <span class="s1">self.x += self.vel</span>
+
+    <span class="s2">def </span><span class="s1">move_left(self):</span>
+        <span class="s1">self.x -= self.vel</span>
+
+    <span class="s0"># Function to check if player is colliding with enemy</span>
+    <span class="s2">def </span><span class="s1">check_enemy_collision(self):</span>
+        <span class="s2">for </span><span class="s1">invader </span><span class="s2">in </span><span class="s1">enemies:</span>
+            <span class="s1">distance = hypot(self.x - invader.x</span><span class="s2">, </span><span class="s1">self.y - invader.y)</span>
+            <span class="s2">if </span><span class="s1">distance &lt; </span><span class="s4">27</span><span class="s1">:</span>
+                <span class="s2">return True</span>
+
+
+<span class="s0"># Enemy class, attributes and methods</span>
+<span class="s2">class </span><span class="s1">Enemy:</span>
+    <span class="s2">def </span><span class="s1">__init__(self</span><span class="s2">, </span><span class="s1">min_score):</span>
+        <span class="s1">self.x = randint(</span><span class="s4">50</span><span class="s2">, </span><span class="s4">700</span><span class="s1">)</span>
+        <span class="s1">self.y = randint(</span><span class="s4">20</span><span class="s2">, </span><span class="s4">151</span><span class="s1">)</span>
+        <span class="s1">self.width = </span><span class="s4">40</span>
+        <span class="s1">self.height = </span><span class="s4">40</span>
+        <span class="s1">self.image = pygame.transform.scale(pygame.image.load(</span><span class="s3">'enemy.png'</span><span class="s1">)</span><span class="s2">, </span><span class="s1">(</span><span class="s4">40</span><span class="s2">, </span><span class="s4">40</span><span class="s1">))</span>
+        <span class="s1">self.x_vel = </span><span class="s4">6 </span><span class="s1">* choice([-</span><span class="s4">1</span><span class="s2">, </span><span class="s4">1</span><span class="s1">])  </span><span class="s0"># Randomly makes x velocity negative or positive for the beginning</span>
+        <span class="s2">if </span><span class="s1">difficulty == </span><span class="s3">'E'</span><span class="s1">:</span>
+            <span class="s1">self.y_vel = </span><span class="s4">0.3</span>
+        <span class="s2">if </span><span class="s1">difficulty == </span><span class="s3">'I'</span><span class="s1">:</span>
+            <span class="s1">self.y_vel = </span><span class="s4">0.5</span>
+        <span class="s2">if </span><span class="s1">difficulty == </span><span class="s3">'H'</span><span class="s1">:</span>
+            <span class="s1">self.y_vel = </span><span class="s4">0.7</span>
+        <span class="s1">self.is_bullet_collision = </span><span class="s2">False</span>
+        <span class="s1">self.min_score = min_score</span>
+        <span class="s2">if </span><span class="s1">difficulty == </span><span class="s3">'E'</span><span class="s1">:</span>
+            <span class="s1">self.lives = </span><span class="s4">2</span>
+        <span class="s2">if </span><span class="s1">difficulty == </span><span class="s3">'I'</span><span class="s1">:</span>
+            <span class="s1">self.lives = </span><span class="s4">3</span>
+        <span class="s2">if </span><span class="s1">difficulty == </span><span class="s3">'H'</span><span class="s1">:</span>
+            <span class="s1">self.lives = </span><span class="s4">4</span>
+        <span class="s1">self.lives2 = self.lives</span>
+
+    <span class="s2">def </span><span class="s1">draw_enemy(self):</span>
+        <span class="s2">if </span><span class="s1">score_value &gt;= self.min_score </span><span class="s2">and </span><span class="s1">self.lives &gt; </span><span class="s4">0</span><span class="s1">:</span>
+            <span class="s1">screen.blit(self.image</span><span class="s2">, </span><span class="s1">(self.x</span><span class="s2">, </span><span class="s1">self.y))</span>
+
+    <span class="s2">def </span><span class="s1">move_enemy(self):</span>
+        <span class="s2">if </span><span class="s1">score_value &gt;= self.min_score </span><span class="s2">and </span><span class="s1">self.lives &gt; </span><span class="s4">0</span><span class="s1">:</span>
+            <span class="s0"># Enemy Movement</span>
+            <span class="s0"># Constantly adds to x, velocity is made negative if it's on the right, positive if it's on the left</span>
+            <span class="s2">if </span><span class="s1">self.x &lt;= </span><span class="s4">0</span><span class="s1">:</span>
+                <span class="s1">self.x_vel = self.x_vel * - </span><span class="s4">1</span>
+            <span class="s2">elif </span><span class="s1">self.x &gt;= </span><span class="s4">800 </span><span class="s1">- self.width - </span><span class="s4">5</span><span class="s1">:</span>
+                <span class="s1">self.x_vel = self.x_vel * - </span><span class="s4">1</span>
+
+            <span class="s0"># Adds to x value using x velocity, which has been altered to negative or positive depending on the value</span>
+            <span class="s1">self.x += self.x_vel</span>
+            <span class="s0"># Adds to y value using y velocity, stays constant</span>
+            <span class="s1">self.y += self.y_vel</span>
+
+    <span class="s2">def </span><span class="s1">check_bullet_collision(self):</span>
+        <span class="s2">if </span><span class="s1">score_value &gt;= self.min_score </span><span class="s2">and </span><span class="s1">self.lives &gt; </span><span class="s4">0</span><span class="s1">:</span>
+            <span class="s1">x_centre = self.x + (self.width / </span><span class="s4">2</span><span class="s1">)</span>
+            <span class="s1">y_centre = self.y - (self.height / </span><span class="s4">2</span><span class="s1">)</span>
+            <span class="s1">bullet_x_centre = bullet.x + (bullet.width / </span><span class="s4">2</span><span class="s1">)</span>
+            <span class="s1">bullet_y_centre = bullet.y - (bullet.height / </span><span class="s4">2</span><span class="s1">)</span>
+            <span class="s1">distance = hypot(x_centre - bullet_x_centre</span><span class="s2">, </span><span class="s1">y_centre - bullet_y_centre)</span>
+            <span class="s2">if </span><span class="s1">distance &lt; </span><span class="s4">33 </span><span class="s2">and </span><span class="s1">self.y &lt; </span><span class="s4">480</span><span class="s1">:</span>
+                <span class="s1">self.is_bullet_collision = </span><span class="s2">True</span>
+
+    <span class="s2">def </span><span class="s1">respawn(self):</span>
+        <span class="s2">if </span><span class="s1">score_value &gt;= self.min_score </span><span class="s2">and </span><span class="s1">self.lives &gt; </span><span class="s4">0</span><span class="s1">:</span>
+            <span class="s1">self.lives -= </span><span class="s4">1</span>
+            <span class="s1">self.x = randint(</span><span class="s4">50</span><span class="s2">, </span><span class="s4">700</span><span class="s1">)</span>
+            <span class="s1">self.y = randint(</span><span class="s4">20</span><span class="s2">, </span><span class="s4">151</span><span class="s1">)</span>
+            <span class="s1">self.is_bullet_collision = </span><span class="s2">False</span>
+        <span class="s2">if </span><span class="s1">self.lives == </span><span class="s4">0</span><span class="s1">:</span>
+            <span class="s1">self.x = -</span><span class="s4">1000</span>
+            <span class="s1">self.y = -</span><span class="s4">800</span>
+            <span class="s1">self.is_bullet_collision = </span><span class="s2">False</span>
+
+    <span class="s2">def </span><span class="s1">bullet_collision(self):</span>
+        <span class="s2">global </span><span class="s1">score_value</span>
+        <span class="s2">if </span><span class="s1">score_value &gt;= self.min_score </span><span class="s2">and </span><span class="s1">self.lives &gt; </span><span class="s4">0</span><span class="s1">:</span>
+            <span class="s2">if </span><span class="s1">self.is_bullet_collision:</span>
+                <span class="s1">bullet.reset()</span>
+                <span class="s1">bullet.update_x()</span>
+                <span class="s1">pygame.mixer.Sound.play(explosion)</span>
+                <span class="s1">score_value += </span><span class="s4">1</span>
+                <span class="s1">self.respawn()</span>
+
+
+<span class="s0"># Bullet class, attributes and methods</span>
+<span class="s2">class </span><span class="s1">Bullet:</span>
+    <span class="s2">def </span><span class="s1">__init__(self):</span>
+        <span class="s1">self.x = spaceship.x + </span><span class="s4">24</span>
+        <span class="s1">self.x2 = self.x</span>
+        <span class="s1">self.y = spaceship.y + </span><span class="s4">20</span>
+        <span class="s1">self.y2 = self.y</span>
+        <span class="s1">self.y_vel = </span><span class="s4">12</span>
+        <span class="s1">self.width = </span><span class="s4">16</span>
+        <span class="s1">self.height = </span><span class="s4">16</span>
+        <span class="s1">self.image = pygame.image.load(</span><span class="s3">'bullet2.png'</span><span class="s1">)</span>
+        <span class="s1">self.motion = </span><span class="s2">False</span>
+
+    <span class="s2">def </span><span class="s1">draw_bullet(self):</span>
+        <span class="s1">screen.blit(self.image</span><span class="s2">, </span><span class="s1">(self.x</span><span class="s2">, </span><span class="s1">self.y))</span>
+
+    <span class="s2">def </span><span class="s1">fire_bullet(self):</span>
+        <span class="s2">if not </span><span class="s1">self.motion:</span>
+            <span class="s1">pygame.mixer.Sound.play(bullet_fire)</span>
+        <span class="s1">self.motion = </span><span class="s2">True</span>
+
+    <span class="s2">def </span><span class="s1">update_x(self):</span>
+        <span class="s1">self.x = spaceship.x + </span><span class="s4">24</span>
+
+    <span class="s2">def </span><span class="s1">reset(self):</span>
+        <span class="s1">self.x = self.x2</span>
+        <span class="s1">self.y = self.y2</span>
+        <span class="s1">self.motion = </span><span class="s2">False</span>
+
+
+<span class="s0"># Button class, attributes and methods</span>
+<span class="s2">class </span><span class="s1">Button:</span>
+    <span class="s2">def </span><span class="s1">__init__(self</span><span class="s2">, </span><span class="s1">x</span><span class="s2">, </span><span class="s1">y</span><span class="s2">, </span><span class="s1">color</span><span class="s2">, </span><span class="s1">text</span><span class="s2">, </span><span class="s1">text_x</span><span class="s2">, </span><span class="s1">text_y):</span>
+        <span class="s1">self.x = x</span>
+        <span class="s1">self.y = y</span>
+        <span class="s1">self.width = len(text) * </span><span class="s4">9</span>
+        <span class="s1">self.height = </span><span class="s4">40</span>
+        <span class="s1">self.color = color</span>
+        <span class="s2">if </span><span class="s1">self.color == (</span><span class="s4">0</span><span class="s2">, </span><span class="s4">255</span><span class="s2">, </span><span class="s4">0</span><span class="s1">):</span>
+            <span class="s1">self.color2 = (</span><span class="s4">255</span><span class="s2">, </span><span class="s4">242</span><span class="s2">, </span><span class="s4">0</span><span class="s1">)</span>
+        <span class="s2">if </span><span class="s1">self.color == (</span><span class="s4">255</span><span class="s2">, </span><span class="s4">0</span><span class="s2">, </span><span class="s4">0</span><span class="s1">):</span>
+            <span class="s1">self.color2 = (</span><span class="s4">232</span><span class="s2">, </span><span class="s4">0</span><span class="s2">, </span><span class="s4">84</span><span class="s1">)</span>
+        <span class="s1">self.text = text</span>
+        <span class="s1">self.font = pygame.font.Font(</span><span class="s3">'OpenSans-Bold.ttf'</span><span class="s2">, </span><span class="s4">14</span><span class="s1">)</span>
+        <span class="s1">self.text_surface = self.font.render(self.text</span><span class="s2">, True, </span><span class="s1">(</span><span class="s4">0</span><span class="s2">, </span><span class="s4">0</span><span class="s2">, </span><span class="s4">0</span><span class="s1">))</span>
+        <span class="s1">self.text_x = text_x</span>
+        <span class="s1">self.text_y = text_y</span>
+
+    <span class="s2">def </span><span class="s1">draw_button(self):</span>
+        <span class="s2">if </span><span class="s1">self.mouse_is_over(mouse_pos):</span>
+            <span class="s1">pygame.draw.rect(screen</span><span class="s2">, </span><span class="s1">self.color2</span><span class="s2">, </span><span class="s1">(self.x</span><span class="s2">, </span><span class="s1">self.y</span><span class="s2">, </span><span class="s1">self.width</span><span class="s2">, </span><span class="s1">self.height))</span>
+        <span class="s2">else</span><span class="s1">:</span>
+            <span class="s1">pygame.draw.rect(screen</span><span class="s2">, </span><span class="s1">self.color</span><span class="s2">, </span><span class="s1">(self.x</span><span class="s2">, </span><span class="s1">self.y</span><span class="s2">, </span><span class="s1">self.width</span><span class="s2">, </span><span class="s1">self.height))</span>
+        <span class="s1">screen.blit(self.text_surface</span><span class="s2">, </span><span class="s1">(self.text_x</span><span class="s2">, </span><span class="s1">self.text_y))</span>
+
+    <span class="s2">def </span><span class="s1">mouse_is_over(self</span><span class="s2">, </span><span class="s1">pos):</span>
+        <span class="s2">if </span><span class="s1">self.x &lt;= pos[</span><span class="s4">0</span><span class="s1">] &lt;= self.x + self.width </span><span class="s2">and </span><span class="s1">self.y &lt;= pos[</span><span class="s4">1</span><span class="s1">] &lt;= self.y + self.height:</span>
+            <span class="s2">return True</span>
+
+
+<span class="s0"># Loading in background image as PyGame surface</span>
+<span class="s1">bg = pygame.image.load(</span><span class="s3">'background2.jpg'</span><span class="s1">)</span>
+
+<span class="s0"># Instantiating all classes</span>
+<span class="s1">spaceship = Player(</span><span class="s4">350</span><span class="s2">, </span><span class="s4">500</span><span class="s1">)</span>
+<span class="s0"># Enemy objects are given min_score value, this determines the score needed to allow them to activate</span>
+<span class="s1">space_invader = Enemy(</span><span class="s4">0</span><span class="s1">)</span>
+<span class="s1">space_invader2 = Enemy(</span><span class="s4">1</span><span class="s1">)</span>
+<span class="s1">space_invader3 = Enemy(</span><span class="s4">1</span><span class="s1">)</span>
+<span class="s1">space_invader4 = Enemy(</span><span class="s4">3</span><span class="s1">)</span>
+<span class="s1">space_invader5 = Enemy(</span><span class="s4">5</span><span class="s1">)</span>
+<span class="s1">space_invader6 = Enemy(</span><span class="s4">5</span><span class="s1">)</span>
+<span class="s1">space_invader7 = Enemy(</span><span class="s4">7</span><span class="s1">)</span>
+<span class="s1">space_invader8 = Enemy(</span><span class="s4">8</span><span class="s1">)</span>
+<span class="s1">space_invader9 = Enemy(</span><span class="s4">8</span><span class="s1">)</span>
+<span class="s1">space_invader10 = Enemy(</span><span class="s4">9</span><span class="s1">)</span>
+<span class="s1">space_invader11 = Enemy(</span><span class="s4">9</span><span class="s1">)</span>
+<span class="s1">space_invader12 = Enemy(</span><span class="s4">9</span><span class="s1">)</span>
+<span class="s1">space_invader13 = Enemy(</span><span class="s4">10</span><span class="s1">)</span>
+<span class="s1">space_invader14 = Enemy(</span><span class="s4">10</span><span class="s1">)</span>
+<span class="s1">space_invader15 = Enemy(</span><span class="s4">10</span><span class="s1">)</span>
+<span class="s1">bullet = Bullet()</span>
+<span class="s1">start_game_button = Button(</span><span class="s4">200</span><span class="s2">, </span><span class="s4">430</span><span class="s2">, </span><span class="s1">(</span><span class="s4">0</span><span class="s2">, </span><span class="s4">255</span><span class="s2">, </span><span class="s4">0</span><span class="s1">)</span><span class="s2">, </span><span class="s3">'Start Game'</span><span class="s2">, </span><span class="s4">206</span><span class="s2">, </span><span class="s4">440</span><span class="s1">)</span>
+<span class="s1">quit_button = Button(</span><span class="s4">530</span><span class="s2">, </span><span class="s4">430</span><span class="s2">, </span><span class="s1">(</span><span class="s4">255</span><span class="s2">, </span><span class="s4">0</span><span class="s2">, </span><span class="s4">0</span><span class="s1">)</span><span class="s2">, </span><span class="s3">'Quit Game'</span><span class="s2">, </span><span class="s4">533</span><span class="s2">, </span><span class="s4">440</span><span class="s1">)</span>
+<span class="s1">play_again_button = Button(</span><span class="s4">300</span><span class="s2">, </span><span class="s4">430</span><span class="s2">, </span><span class="s1">(</span><span class="s4">0</span><span class="s2">, </span><span class="s4">255</span><span class="s2">, </span><span class="s4">0</span><span class="s1">)</span><span class="s2">, </span><span class="s3">'Play Again'</span><span class="s2">, </span><span class="s4">306</span><span class="s2">, </span><span class="s4">440</span><span class="s1">)</span>
+<span class="s1">easy = Button(</span><span class="s4">350</span><span class="s2">, </span><span class="s4">310</span><span class="s2">, </span><span class="s1">(</span><span class="s4">0</span><span class="s2">, </span><span class="s4">255</span><span class="s2">, </span><span class="s4">0</span><span class="s1">)</span><span class="s2">, </span><span class="s3">'Easy'</span><span class="s2">, </span><span class="s4">385</span><span class="s2">, </span><span class="s4">320</span><span class="s1">)</span>
+<span class="s1">intermediate = Button(</span><span class="s4">350</span><span class="s2">, </span><span class="s4">360</span><span class="s2">, </span><span class="s1">(</span><span class="s4">0</span><span class="s2">, </span><span class="s4">255</span><span class="s2">, </span><span class="s4">0</span><span class="s1">)</span><span class="s2">, </span><span class="s3">'Intermediate'</span><span class="s2">, </span><span class="s4">356</span><span class="s2">, </span><span class="s4">370</span><span class="s1">)</span>
+<span class="s1">hard = Button(</span><span class="s4">350</span><span class="s2">, </span><span class="s4">410</span><span class="s2">, </span><span class="s1">(</span><span class="s4">0</span><span class="s2">, </span><span class="s4">255</span><span class="s2">, </span><span class="s4">0</span><span class="s1">)</span><span class="s2">, </span><span class="s3">'Hard'</span><span class="s2">, </span><span class="s4">385</span><span class="s2">, </span><span class="s4">420</span><span class="s1">)</span>
+<span class="s1">easy.width = </span><span class="s4">108  </span><span class="s0"># Changing button width to equal all three button widths</span>
+<span class="s1">hard.width = </span><span class="s4">108</span>
+
+<span class="s0"># List of enemies</span>
+<span class="s1">enemies = [space_invader</span><span class="s2">, </span><span class="s1">space_invader2</span><span class="s2">, </span><span class="s1">space_invader3</span><span class="s2">, </span><span class="s1">space_invader4</span><span class="s2">, </span><span class="s1">space_invader5</span><span class="s2">, </span><span class="s1">space_invader6</span><span class="s2">,</span>
+           <span class="s1">space_invader7</span><span class="s2">, </span><span class="s1">space_invader8</span><span class="s2">, </span><span class="s1">space_invader9</span><span class="s2">, </span><span class="s1">space_invader10</span><span class="s2">, </span><span class="s1">space_invader11</span><span class="s2">, </span><span class="s1">space_invader12</span><span class="s2">,</span>
+           <span class="s1">space_invader13</span><span class="s2">, </span><span class="s1">space_invader14</span><span class="s2">, </span><span class="s1">space_invader15]</span>
+
+<span class="s0"># Displaying score text on screen</span>
+<span class="s1">score_value = </span><span class="s4">0  </span><span class="s0"># Creating variable for value of score to use for displaying</span>
+<span class="s1">arcade_font_score = pygame.font.Font(</span><span class="s3">'ARCADE_N.TTF'</span><span class="s2">, </span><span class="s4">28</span><span class="s1">)  </span><span class="s0"># Creating variable for font and it's size</span>
+<span class="s1">arcade_font_difficulty = pygame.font.Font(</span><span class="s3">'ARCADE_N.TTF'</span><span class="s2">, </span><span class="s4">32</span><span class="s1">)</span>
+<span class="s1">difficulty_text = arcade_font_difficulty.render(</span><span class="s3">'Choose your difficulty:'</span><span class="s2">, True, </span><span class="s1">(</span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s1">))</span>
+
+<span class="s0"># Loading in game-over.png as PyGame surface</span>
+<span class="s1">game_over_image = pygame.image.load(</span><span class="s3">'game-over.png'</span><span class="s1">)</span>
+
+<span class="s1">paused_text = arcade_font_difficulty.render(</span><span class="s3">'Paused'</span><span class="s2">, True, </span><span class="s1">(</span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s1">))</span>
+
+<span class="s1">winner_image = pygame.image.load(</span><span class="s3">'winner.png'</span><span class="s1">)</span>
+<span class="s1">winner_image_x = </span><span class="s4">1000</span>
+<span class="s1">winner_image_y = </span><span class="s4">50</span>
+<span class="s1">winner_image_vel = -</span><span class="s4">20</span>
+<span class="s1">win_audio = pygame.mixer.Sound(</span><span class="s3">'winner_audio.wav'</span><span class="s1">)</span>
+
+<span class="s0"># Assigning variables for game-over image coordinates</span>
+<span class="s1">game_over_x = </span><span class="s4">273</span>
+<span class="s1">game_over_y = -</span><span class="s4">200</span>
+<span class="s1">game_over_final_y = </span><span class="s4">216</span>
+
+<span class="s0"># Game Intro</span>
+<span class="s1">intro_title = pygame.image.load(</span><span class="s3">'space_invaders_title.png'</span><span class="s1">)</span>
+<span class="s1">intro_title_x = </span><span class="s4">150</span>
+<span class="s1">intro_title_y = </span><span class="s4">187</span>
+
+
+<span class="s2">def </span><span class="s1">display_score():</span>
+    <span class="s0"># Creating variable for PyGame surface. Contains text rendered using our loaded font variable</span>
+    <span class="s0"># Assigning values for text we want used, antialias boolean and color</span>
+    <span class="s1">score = arcade_font_score.render(</span><span class="s3">&quot;Score: &quot; </span><span class="s1">+ str(score_value)</span><span class="s2">, True, </span><span class="s1">(</span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s1">))</span>
+    <span class="s0"># Drawing score surface onto screen</span>
+    <span class="s1">screen.blit(score</span><span class="s2">, </span><span class="s1">(</span><span class="s4">10</span><span class="s2">, </span><span class="s4">10</span><span class="s1">))</span>
+
+
+<span class="s0"># Defining function to see if enemy has been let off screen</span>
+<span class="s2">def </span><span class="s1">check_position(enemy):</span>
+    <span class="s2">global </span><span class="s1">game_over</span>
+    <span class="s2">if </span><span class="s1">enemy.y &gt;= </span><span class="s4">600</span><span class="s1">:</span>
+        <span class="s1">game_over = </span><span class="s2">True</span>
+
+
+<span class="s1">already_done = </span><span class="s2">False  </span><span class="s0"># Variable to prevent repeated subtraction from quit_button.x</span>
+<span class="s1">winner_played = </span><span class="s2">False</span>
+<span class="s1">buttons_changed = </span><span class="s2">False</span>
+
+<span class="s1">controls_font = pygame.font.Font(</span><span class="s3">'OpenSans-Bold.ttf'</span><span class="s2">, </span><span class="s4">14</span><span class="s1">)</span>
+<span class="s1">controls_text = controls_font.render(</span><span class="s3">'Controls:'</span><span class="s2">, True, </span><span class="s1">(</span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s1">))</span>
+<span class="s1">left_arrow = controls_font.render(</span><span class="s3">'Left Arrow - Move Left'</span><span class="s2">, True, </span><span class="s1">(</span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s1">))</span>
+<span class="s1">right_arrow = controls_font.render(</span><span class="s3">'Right Arrow - Move Right'</span><span class="s2">, True, </span><span class="s1">(</span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s1">))</span>
+<span class="s1">space_controls = controls_font.render(</span><span class="s3">'Space - Shoot'</span><span class="s2">, True, </span><span class="s1">(</span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s1">))</span>
+<span class="s1">escape = controls_font.render(</span><span class="s3">'ESC - Pause'</span><span class="s2">, True, </span><span class="s1">(</span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s1">))</span>
+<span class="s1">mouse_controls = controls_font.render(</span><span class="s3">'Mouse to click buttons'</span><span class="s2">, True, </span><span class="s1">(</span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s2">, </span><span class="s4">255</span><span class="s1">))</span>
+
+
+<span class="s0"># Defining function to draw game window</span>
+<span class="s2">def </span><span class="s1">draw_game_window():</span>
+    <span class="s2">global </span><span class="s1">already_done</span>
+    <span class="s2">global </span><span class="s1">winner_played</span>
+    <span class="s2">global </span><span class="s1">buttons_changed</span>
+    <span class="s2">if not </span><span class="s1">past_start_screen </span><span class="s2">and not </span><span class="s1">pause </span><span class="s2">and not </span><span class="s1">game_won:</span>
+        <span class="s1">screen.blit(bg</span><span class="s2">, </span><span class="s1">(</span><span class="s4">0</span><span class="s2">, </span><span class="s4">0</span><span class="s1">))</span>
+        <span class="s1">screen.blit(intro_title</span><span class="s2">, </span><span class="s1">(intro_title_x</span><span class="s2">, </span><span class="s1">intro_title_y))</span>
+        <span class="s1">start_game_button.draw_button()</span>
+        <span class="s1">quit_button.draw_button()</span>
+        <span class="s1">pygame.display.update()</span>
+    <span class="s2">if </span><span class="s1">past_start_screen </span><span class="s2">and not </span><span class="s1">game_begun </span><span class="s2">and not </span><span class="s1">pause </span><span class="s2">and not </span><span class="s1">game_won:</span>
+        <span class="s1">screen.blit(bg</span><span class="s2">, </span><span class="s1">(</span><span class="s4">0</span><span class="s2">, </span><span class="s4">0</span><span class="s1">))</span>
+        <span class="s1">screen.blit(difficulty_text</span><span class="s2">, </span><span class="s1">(</span><span class="s4">60</span><span class="s2">, </span><span class="s4">250</span><span class="s1">))</span>
+        <span class="s1">screen.blit(controls_text</span><span class="s2">, </span><span class="s1">(</span><span class="s4">374</span><span class="s2">, </span><span class="s4">50</span><span class="s1">))</span>
+        <span class="s1">screen.blit(left_arrow</span><span class="s2">, </span><span class="s1">(</span><span class="s4">333</span><span class="s2">, </span><span class="s4">70</span><span class="s1">))</span>
+        <span class="s1">screen.blit(right_arrow</span><span class="s2">, </span><span class="s1">(</span><span class="s4">326</span><span class="s2">, </span><span class="s4">90</span><span class="s1">))</span>
+        <span class="s1">screen.blit(space_controls</span><span class="s2">, </span><span class="s1">(</span><span class="s4">366</span><span class="s2">, </span><span class="s4">110</span><span class="s1">))</span>
+        <span class="s1">screen.blit(escape</span><span class="s2">, </span><span class="s1">(</span><span class="s4">366</span><span class="s2">, </span><span class="s4">130</span><span class="s1">))</span>
+        <span class="s1">screen.blit(mouse_controls</span><span class="s2">, </span><span class="s1">(</span><span class="s4">331</span><span class="s2">, </span><span class="s4">150</span><span class="s1">))</span>
+        <span class="s1">easy.draw_button()</span>
+        <span class="s1">intermediate.draw_button()</span>
+        <span class="s1">hard.draw_button()</span>
+        <span class="s1">pygame.display.update()</span>
+    <span class="s2">if </span><span class="s1">pause </span><span class="s2">and not </span><span class="s1">game_over </span><span class="s2">and not </span><span class="s1">game_won:</span>
+        <span class="s1">screen.blit(paused_text</span><span class="s2">, </span><span class="s1">(</span><span class="s4">300</span><span class="s2">, </span><span class="s4">280</span><span class="s1">))</span>
+        <span class="s1">pygame.display.update()</span>
+    <span class="s2">if </span><span class="s1">game_won:</span>
+        <span class="s1">screen.blit(bg</span><span class="s2">, </span><span class="s1">(</span><span class="s4">0</span><span class="s2">, </span><span class="s4">0</span><span class="s1">))</span>
+        <span class="s1">screen.blit(winner_image</span><span class="s2">, </span><span class="s1">(winner_image_x</span><span class="s2">, </span><span class="s1">winner_image_y))</span>
+        <span class="s0"># screen.blit(high_score_text, (200, 460))</span>
+        <span class="s1">spaceship.draw_player()</span>
+        <span class="s2">if not </span><span class="s1">buttons_changed:</span>
+            <span class="s1">play_again_button.x -= </span><span class="s4">100</span>
+            <span class="s1">play_again_button.y -= </span><span class="s4">50</span>
+            <span class="s1">play_again_button.text_x -= </span><span class="s4">100</span>
+            <span class="s1">play_again_button.text_y -= </span><span class="s4">50</span>
+            <span class="s1">quit_button.x -= </span><span class="s4">40</span>
+            <span class="s1">quit_button.y -= </span><span class="s4">50</span>
+            <span class="s1">quit_button.text_x -= </span><span class="s4">40</span>
+            <span class="s1">quit_button.text_y -= </span><span class="s4">50</span>
+            <span class="s1">buttons_changed = </span><span class="s2">True</span>
+        <span class="s1">play_again_button.draw_button()</span>
+        <span class="s1">quit_button.draw_button()</span>
+        <span class="s1">display_score()</span>
+        <span class="s1">pygame.display.update()</span>
+    <span class="s2">if </span><span class="s1">past_start_screen </span><span class="s2">and </span><span class="s1">game_begun </span><span class="s2">and not </span><span class="s1">pause </span><span class="s2">and not </span><span class="s1">game_won:</span>
+        <span class="s0"># Bringing game over screen if game_over</span>
+        <span class="s2">if </span><span class="s1">game_over:</span>
+            <span class="s1">screen.blit(bg</span><span class="s2">, </span><span class="s1">(</span><span class="s4">0</span><span class="s2">, </span><span class="s4">0</span><span class="s1">))</span>
+            <span class="s0"># screen.blit(high_score_text, (200, 480))</span>
+            <span class="s2">if </span><span class="s1">game_over_y &gt; </span><span class="s4">210</span><span class="s1">:</span>
+                <span class="s2">if </span><span class="s1">buttons_changed:</span>
+                    <span class="s1">play_again_button.x += </span><span class="s4">100</span>
+                    <span class="s1">play_again_button.y += </span><span class="s4">50</span>
+                    <span class="s1">play_again_button.text_x += </span><span class="s4">100</span>
+                    <span class="s1">play_again_button.text_y += </span><span class="s4">50</span>
+                    <span class="s1">quit_button.x += </span><span class="s4">40</span>
+                    <span class="s1">quit_button.y += </span><span class="s4">50</span>
+                    <span class="s1">quit_button.text_x += </span><span class="s4">40</span>
+                    <span class="s1">quit_button.text_y += </span><span class="s4">50</span>
+                    <span class="s1">buttons_changed = </span><span class="s2">False</span>
+                <span class="s2">if not </span><span class="s1">already_done </span><span class="s2">and not </span><span class="s1">buttons_changed:</span>
+                    <span class="s1">quit_button.x -= </span><span class="s4">100</span>
+                    <span class="s1">quit_button.text_x -= </span><span class="s4">100</span>
+                    <span class="s1">already_done = </span><span class="s2">True</span>
+                <span class="s1">quit_button.draw_button()</span>
+                <span class="s1">play_again_button.draw_button()</span>
+            <span class="s2">if </span><span class="s1">game_over_y &lt; </span><span class="s4">210</span><span class="s1">:</span>
+                <span class="s1">pygame.time.wait(</span><span class="s4">195</span><span class="s1">)</span>
+            <span class="s1">screen.blit(game_over_image</span><span class="s2">, </span><span class="s1">(game_over_x</span><span class="s2">, </span><span class="s1">game_over_y))</span>
+            <span class="s1">pygame.display.update()</span>
+        <span class="s2">else</span><span class="s1">:</span>
+            <span class="s0"># screen.fill((48, 20, 58))</span>
+            <span class="s1">screen.blit(bg</span><span class="s2">, </span><span class="s1">(</span><span class="s4">0</span><span class="s2">, </span><span class="s4">0</span><span class="s1">))</span>
+            <span class="s0"># Drawing bullet if it has been fired</span>
+            <span class="s2">if </span><span class="s1">bullet.motion:</span>
+                <span class="s1">bullet.draw_bullet()</span>
+            <span class="s1">spaceship.draw_player()  </span><span class="s0"># Drawing player</span>
+            <span class="s0"># Calling draw enemy method on every enemy, only works if they are activated</span>
+            <span class="s2">for </span><span class="s1">enemy </span><span class="s2">in </span><span class="s1">enemies:</span>
+                <span class="s1">enemy.draw_enemy()</span>
+            <span class="s1">display_score()</span>
+            <span class="s1">pygame.display.update()</span>
+
+
+<span class="s0"># Main game loop</span>
+<span class="s1">game_won = </span><span class="s2">False</span>
+<span class="s1">game_over = </span><span class="s2">False</span>
+<span class="s1">game_begun = </span><span class="s2">False</span>
+<span class="s1">played_again = </span><span class="s2">False</span>
+<span class="s1">past_start_screen = </span><span class="s2">False</span>
+<span class="s1">already_changed = </span><span class="s2">True</span>
+<span class="s1">pause = </span><span class="s2">False</span>
+<span class="s1">run = </span><span class="s2">True</span>
+<span class="s2">while </span><span class="s1">run:</span>
+    <span class="s1">clock.tick(</span><span class="s4">45</span><span class="s1">)  </span><span class="s0"># Using clock to not allow more than 45 iterations a second</span>
+
+    <span class="s2">for </span><span class="s1">event </span><span class="s2">in </span><span class="s1">pygame.event.get():</span>
+        <span class="s2">if </span><span class="s1">event.type == pygame.QUIT:</span>
+            <span class="s1">run = </span><span class="s2">False</span>
+
+        <span class="s1">mouse_pos = pygame.mouse.get_pos()</span>
+        <span class="s2">if </span><span class="s1">event.type == pygame.MOUSEBUTTONDOWN:</span>
+            <span class="s2">if </span><span class="s1">start_game_button.mouse_is_over(mouse_pos) </span><span class="s2">and not </span><span class="s1">past_start_screen </span><span class="s2">and not </span><span class="s1">game_over:</span>
+                <span class="s1">click.play()</span>
+                <span class="s1">past_start_screen = </span><span class="s2">True</span>
+            <span class="s2">if </span><span class="s1">quit_button.mouse_is_over(mouse_pos) </span><span class="s2">and not </span><span class="s1">game_begun </span><span class="s2">or </span><span class="s1">game_over </span><span class="s2">or </span><span class="s1">game_won:</span>
+                <span class="s1">click.play()</span>
+                <span class="s2">if not </span><span class="s1">play_again_button.mouse_is_over(mouse_pos):</span>
+                    <span class="s1">run = </span><span class="s2">False</span>
+            <span class="s2">if </span><span class="s1">play_again_button.mouse_is_over(mouse_pos) </span><span class="s2">and </span><span class="s1">game_over </span><span class="s2">or </span><span class="s1">game_won:</span>
+                <span class="s1">click.play()</span>
+                <span class="s2">for </span><span class="s1">enemy </span><span class="s2">in </span><span class="s1">enemies:</span>
+                    <span class="s1">enemy.lives = enemy.lives2</span>
+                    <span class="s1">enemy.x = randint(</span><span class="s4">50</span><span class="s2">, </span><span class="s4">700</span><span class="s1">)</span>
+                    <span class="s1">enemy.y = randint(</span><span class="s4">20</span><span class="s2">, </span><span class="s4">151</span><span class="s1">)</span>
+                    <span class="s1">enemy.is_bullet_collision = </span><span class="s2">False</span>
+                <span class="s1">score_value = </span><span class="s4">0</span>
+                <span class="s1">game_begun = </span><span class="s2">False</span>
+                <span class="s1">game_over = </span><span class="s2">False</span>
+                <span class="s1">game_won = </span><span class="s2">False</span>
+                <span class="s1">played_again = </span><span class="s2">True</span>
+            <span class="s2">if </span><span class="s1">easy.mouse_is_over(mouse_pos) </span><span class="s2">and </span><span class="s1">past_start_screen </span><span class="s2">and not </span><span class="s1">intermediate.mouse_is_over(</span>
+                    <span class="s1">mouse_pos) </span><span class="s2">and not </span><span class="s1">hard.mouse_is_over(mouse_pos):</span>
+                <span class="s1">click.play()</span>
+                <span class="s1">already_changed = </span><span class="s2">False</span>
+                <span class="s1">difficulty = </span><span class="s3">'E'</span>
+                <span class="s1">game_begun = </span><span class="s2">True</span>
+
+            <span class="s2">if </span><span class="s1">intermediate.mouse_is_over(mouse_pos) </span><span class="s2">and </span><span class="s1">past_start_screen </span><span class="s2">and not </span><span class="s1">easy.mouse_is_over(</span>
+                    <span class="s1">mouse_pos) </span><span class="s2">and not </span><span class="s1">hard.mouse_is_over(mouse_pos):</span>
+                <span class="s1">click.play()</span>
+                <span class="s1">already_changed = </span><span class="s2">False</span>
+                <span class="s1">difficulty = </span><span class="s3">'I'</span>
+                <span class="s1">game_begun = </span><span class="s2">True</span>
+
+            <span class="s2">if </span><span class="s1">hard.mouse_is_over(mouse_pos) </span><span class="s2">and </span><span class="s1">past_start_screen </span><span class="s2">and not </span><span class="s1">easy.mouse_is_over(</span>
+                    <span class="s1">mouse_pos) </span><span class="s2">and not </span><span class="s1">intermediate.mouse_is_over(mouse_pos):</span>
+                <span class="s1">click.play()</span>
+                <span class="s1">already_changed = </span><span class="s2">False</span>
+                <span class="s1">difficulty = </span><span class="s3">'H'</span>
+                <span class="s1">game_begun = </span><span class="s2">True</span>
+
+    <span class="s2">for </span><span class="s1">enemy </span><span class="s2">in </span><span class="s1">enemies:</span>
+        <span class="s2">if not </span><span class="s1">already_changed:</span>
+            <span class="s2">if </span><span class="s1">difficulty == </span><span class="s3">'E'</span><span class="s1">:</span>
+                <span class="s1">enemy.y_vel = </span><span class="s4">0.3</span>
+                <span class="s1">enemy.lives = </span><span class="s4">2</span>
+            <span class="s2">if </span><span class="s1">difficulty == </span><span class="s3">'I'</span><span class="s1">:</span>
+                <span class="s1">enemy.y_vel = </span><span class="s4">0.5</span>
+                <span class="s1">enemy.lives = </span><span class="s4">3</span>
+            <span class="s2">if </span><span class="s1">difficulty == </span><span class="s3">'H'</span><span class="s1">:</span>
+                <span class="s1">enemy.y_vel = </span><span class="s4">0.7</span>
+                <span class="s1">enemy.lives = </span><span class="s4">4</span>
+            <span class="s1">enemy.lives2 = enemy.lives</span>
+    <span class="s1">already_changed = </span><span class="s2">True</span>
+
+    <span class="s1">keys = pygame.key.get_pressed()  </span><span class="s0"># Creating a tuple of all the keys that are pressed, every iteration</span>
+    <span class="s2">if </span><span class="s1">keys[pygame.K_ESCAPE]:</span>
+        <span class="s2">if </span><span class="s1">pause:</span>
+            <span class="s1">pause = </span><span class="s2">False</span>
+            <span class="s1">pygame.mixer.music.unpause()</span>
+            <span class="s1">pygame.time.wait(</span><span class="s4">200</span><span class="s1">)</span>
+        <span class="s2">else</span><span class="s1">:</span>
+            <span class="s1">pygame.mixer.music.pause()</span>
+            <span class="s1">pause = </span><span class="s2">True</span>
+            <span class="s1">pygame.time.wait(</span><span class="s4">200</span><span class="s1">)</span>
+
+    <span class="s2">if </span><span class="s1">game_over:</span>
+        <span class="s2">if not </span><span class="s1">played_already:</span>
+            <span class="s1">pygame.mixer.music.pause()</span>
+            <span class="s1">trumpetGameOver.play()</span>
+            <span class="s1">played_already = </span><span class="s2">True</span>
+        <span class="s2">if </span><span class="s1">game_over_y &lt; game_over_final_y:</span>
+            <span class="s1">game_over_y += </span><span class="s4">20</span>
+
+    <span class="s2">if </span><span class="s1">game_won:</span>
+        <span class="s2">if not </span><span class="s1">winner_played:</span>
+            <span class="s1">pygame.mixer.music.pause()</span>
+            <span class="s1">win_audio.play()</span>
+            <span class="s1">winner_played = </span><span class="s2">True</span>
+        <span class="s2">if </span><span class="s1">winner_image_x &gt; </span><span class="s4">50</span><span class="s1">:</span>
+            <span class="s1">winner_image_x += winner_image_vel</span>
+
+    <span class="s2">if </span><span class="s1">game_begun </span><span class="s2">and not </span><span class="s1">game_over </span><span class="s2">and not </span><span class="s1">pause </span><span class="s2">and not </span><span class="s1">game_won:</span>
+        <span class="s2">if </span><span class="s1">played_again:</span>
+            <span class="s1">pygame.mixer.music.unpause()</span>
+            <span class="s1">game_over_y = -</span><span class="s4">200</span>
+            <span class="s1">played_already = </span><span class="s2">False</span>
+            <span class="s1">played_again = </span><span class="s2">False</span>
+
+        <span class="s2">if </span><span class="s1">keys[pygame.K_RIGHT]:  </span><span class="s0"># Checking if right key was pressed</span>
+            <span class="s2">if </span><span class="s1">spaceship.x &lt; (</span><span class="s4">800 </span><span class="s1">- spaceship.width - </span><span class="s4">4</span><span class="s1">):</span>
+                <span class="s1">spaceship.move_right()  </span><span class="s0"># Using method to move spaceship right</span>
+        <span class="s2">if </span><span class="s1">keys[pygame.K_LEFT]:</span>
+            <span class="s2">if </span><span class="s1">spaceship.x &gt; </span><span class="s4">0</span><span class="s1">:</span>
+                <span class="s1">spaceship.move_left()</span>
+
+        <span class="s0"># Bullet Movement</span>
+        <span class="s2">if </span><span class="s1">bullet.motion:</span>
+            <span class="s0"># Subtracting from bullet y to make it go up consistently</span>
+            <span class="s1">bullet.y -= bullet.y_vel</span>
+        <span class="s2">if </span><span class="s1">bullet.y &lt;= </span><span class="s4">0 </span><span class="s1">- bullet.height:</span>
+            <span class="s1">bullet.reset()  </span><span class="s0"># Resetting bullet to original state to allow for re-shooting</span>
+        <span class="s2">if not </span><span class="s1">bullet.motion:</span>
+            <span class="s1">bullet.update_x()  </span><span class="s0"># Updating x value of bullet to correspond with ship every iteration</span>
+        <span class="s2">if </span><span class="s1">keys[pygame.K_SPACE]:</span>
+            <span class="s1">bullet.fire_bullet()</span>
+
+        <span class="s0"># All enemy functions:</span>
+        <span class="s2">for </span><span class="s1">enemy </span><span class="s2">in </span><span class="s1">enemies:</span>
+            <span class="s0"># Calling 'move_enemy' method to move invader left to right and down</span>
+            <span class="s1">enemy.move_enemy()</span>
+            <span class="s0"># Checking for collision</span>
+            <span class="s1">enemy.check_bullet_collision()</span>
+            <span class="s0">#  Respawning enemy and resetting bullet if collision is true using bullet_collision method</span>
+            <span class="s1">enemy.bullet_collision()</span>
+
+        <span class="s0"># Checking if any enemy has collided with ship</span>
+        <span class="s2">if </span><span class="s1">spaceship.check_enemy_collision():</span>
+            <span class="s1">game_over = </span><span class="s2">True</span>
+
+        <span class="s0"># Checking if any enemy has been let off screen</span>
+        <span class="s2">for </span><span class="s1">enemy </span><span class="s2">in </span><span class="s1">enemies:</span>
+            <span class="s1">check_position(enemy)</span>
+
+        <span class="s0"># Checking if number of lives for every enemy, adding to dead if lives = 0</span>
+        <span class="s1">dead = </span><span class="s4">0  </span><span class="s0"># Assigning dead variable</span>
+        <span class="s2">for </span><span class="s1">enemy </span><span class="s2">in </span><span class="s1">enemies:</span>
+            <span class="s2">if </span><span class="s1">enemy.lives == </span><span class="s4">0</span><span class="s1">:</span>
+                <span class="s1">dead += </span><span class="s4">1</span>
+
+        <span class="s2">if </span><span class="s1">dead == </span><span class="s4">15</span><span class="s1">:  </span><span class="s0"># Checking if all enemies are dead</span>
+            <span class="s1">game_won = </span><span class="s2">True  </span><span class="s0"># Making game won true</span>
+
+    <span class="s1">draw_game_window()</span>
+
+<span class="s1">pygame.quit()</span>
+</pre>
+</body>
+</html>
